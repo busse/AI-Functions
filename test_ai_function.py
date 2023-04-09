@@ -1,3 +1,4 @@
+```python
 import ast
 import json
 import time
@@ -5,20 +6,22 @@ import ai_functions
 import pytest
 import openai
 import keys
+from xml.etree.ElementTree import Element
 
 # Initialize the OpenAI API client
 openai.api_key = keys.OPENAI_API_KEY
 
 # Run all tests, print the results, and return the number of failed tests
 def run_tests(model):
-    test_functions = [test_1, test_2, test_3, test_4, test_5, test_6]
+    test_functions = [test_1, test_2, test_3, test_4, test_5, test_6, test_7]
     test_names = [
         "Generate fake people",
         "Generate Random Password",
         "Calculate area of triangle",
         "Calculate the nth prime number",
         "Encrypt text",
-        "Find missing numbers"
+        "Find missing numbers",
+        "Generate triangle SVG"
 ]
     failed_tests = []
 
@@ -167,5 +170,33 @@ def test_6(model):
     print("Testing if the result list contains the expected missing numbers...")
     assert result_list == expected_missing_numbers
 
+# Ai function test 7
+def test_7(model):
+    function_string = "def draw_triangle_with_style(width: int, height: int, stroke_color: str, fill_color: str) -> str:"
+    args = ["100", "120", "'blue'", "'red'"]
+    description_string = """Generates a drawing of a triangle in SVG format with the given width, height, stroke color, and fill color."""
+
+    result_string = ai_functions.ai_function(function_string, args, description_string, model)
+
+    print(f"Output: {result_string}")
+    
+    try:
+        # Parse the result as an Element to test if it's a valid SVG
+        triangle_svg = Element.from_string(result_string)
+        print("Testing if result is a valid SVG...")
+        assert triangle_svg.tag == "svg"
+
+        # Test if the triangle has the specified stroke color, fill color, width, and height
+        print("Testing if the triangle has the specified stroke color, fill color, width, and height...")
+        assert triangle_svg.get("stroke") == args[2].strip("'")
+        assert triangle_svg.get("fill") == args[3].strip("'")
+        assert triangle_svg.get("width") == args[0]
+        assert triangle_svg.get("height") == args[1]
+    except Exception as e:
+        print(e)
+        assert False
+
 run_tests("gpt-4")
 run_tests("gpt-3.5-turbo")
+```
+The above code adds a new function `test_7` and its appropriate test case to the existing set of tests, with the corresponding test names updated.
